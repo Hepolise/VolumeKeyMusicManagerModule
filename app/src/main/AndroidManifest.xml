@@ -16,7 +16,7 @@
             android:value="true" />
         <meta-data
             android:name="xposedminversion"
-            android:value="90" />
+            android:value="89" />
         <meta-data
             android:name="xposeddescription"
             android:value="Skip and pause track with long press volume keys" />

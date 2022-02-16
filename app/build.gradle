@@ -8,7 +8,7 @@ android {
 
     defaultConfig {
         applicationId "ru.hepolise.volumekeymusicmanagermodule"
-        minSdk 21
+        minSdk 25
         targetSdk 32
         versionCode 1
         versionName "1.0"

@@ -27,7 +27,11 @@ public class VolumeManagerModule implements IXposedHookLoadPackage {
     private static final boolean DEBUG = true;
 
     private static boolean mIsLongPress = false;
-    private static int mButtonsPressed = 0;
+
+    private static boolean mIsDownPressed = false;
+    private static boolean mIsUpPressed = false;
+
+//    private static int mButtonsPressed = 0;
     private static AudioManager mAudioManager;
     private static PowerManager mPowerManager;
 
@@ -63,10 +67,17 @@ public class VolumeManagerModule implements IXposedHookLoadPackage {
                     !mPowerManager.isInteractive() &&
                     mAudioManager != null) {
                 if (event.getAction() == KeyEvent.ACTION_DOWN) {
-                    mButtonsPressed++;
-                    log("down action received, current buttons counter: " + mButtonsPressed);
+                    if (keyCode == KeyEvent.KEYCODE_VOLUME_DOWN)
+                        mIsDownPressed = true;
+                    if (keyCode == KeyEvent.KEYCODE_VOLUME_UP)
+                        mIsUpPressed = true;
+                    log("down action received, down: " + mIsDownPressed + ", up: " + mIsUpPressed);
                     mIsLongPress = false;
-                    if (mButtonsPressed == 1) {
+                    if (mIsUpPressed && mIsDownPressed) {
+                        log("aborting delayed skip");
+                        handleVolumeSkipPressAbort(param.thisObject);
+                    } else {
+                        // only one button pressed
                         if (isMusicActive()) {
                             log("music is active, creating delayed skip");
                             handleVolumeSkipPress(param.thisObject, keyCode);
@@ -74,13 +85,12 @@ public class VolumeManagerModule implements IXposedHookLoadPackage {
                         log("creating delayed play pause");
                         handleVolumePlayPausePress(param.thisObject);
                     }
-                    if (mButtonsPressed == 2) {
-                        log("aborting delayed skip");
-                        handleVolumeSkipPressAbort(param.thisObject);
-                    }
                 } else {
-                    mButtonsPressed--;
-                    log("up action received, current buttons counter: " + mButtonsPressed);
+                    if (keyCode == KeyEvent.KEYCODE_VOLUME_DOWN)
+                        mIsDownPressed = false;
+                    if (keyCode == KeyEvent.KEYCODE_VOLUME_UP)
+                        mIsUpPressed = false;
+                    log("up action received, down: " + mIsDownPressed + ", up: " + mIsUpPressed);
                     handleVolumeAllPressAbort(param.thisObject);
                     if (!mIsLongPress && isMusicActive()) {
                         log("adjusting music volume");
@@ -111,12 +121,12 @@ public class VolumeManagerModule implements IXposedHookLoadPackage {
             };
 
             Runnable mVolumeBothLongPress = () -> {
-                if (mButtonsPressed == 2) {
+                if (mIsUpPressed && mIsDownPressed) {
                     log("sending play/pause");
                     mIsLongPress = true;
                     sendMediaButtonEvent(KeyEvent.KEYCODE_MEDIA_PLAY_PAUSE);
                 } else {
-                    log("NOT sending play/pause, current buttons pressed: " + mButtonsPressed);
+                    log("NOT sending play/pause, down: " + mIsDownPressed + ", up: " + mIsUpPressed);
                 }
             };
 

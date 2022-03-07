@@ -64,7 +64,7 @@ public class VolumeManagerModule implements IXposedHookLoadPackage {
             if ((keyCode == KeyEvent.KEYCODE_VOLUME_DOWN ||
                     keyCode == KeyEvent.KEYCODE_VOLUME_UP) &&
                     (event.getFlags() & KeyEvent.FLAG_FROM_SYSTEM) != 0 &&
-                    !mPowerManager.isInteractive() &&
+                    (!mPowerManager.isInteractive() || mIsDownPressed || mIsUpPressed) &&
                     mAudioManager != null) {
                 if (event.getAction() == KeyEvent.ACTION_DOWN) {
                     if (keyCode == KeyEvent.KEYCODE_VOLUME_DOWN)

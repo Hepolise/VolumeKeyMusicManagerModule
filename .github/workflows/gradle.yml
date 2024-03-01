@@ -25,6 +25,9 @@ jobs:
           alias: ${{ secrets.KEY_ALIAS }}
           keyStorePassword: ${{ secrets.KEYSTORE_PASSWORD }}
           keyPassword: ${{ secrets.KEY_PASSWORD }}
+        env:
+          # override default build-tools version (33.0.0) -- optional
+          BUILD_TOOLS_VERSION: "34.0.0"
       - name: Rename
         run: mv app/build/outputs/apk/release/app-release-unsigned-signed.apk VolumeKeyMusicManagerModule-release.apk
       - name: Upload
